@@ -1,0 +1,196 @@
+# NN Food & Spices
+
+Premium Flutter application for **[Nujju's Nest Spices Pvt. Ltd.](https://nnfoodsandspices.com)** — one codebase targeting Android, iPhone/iPad, Windows, macOS, Linux and Web.
+
+> 100% Naturally Pure Spices
+
+---
+
+## Table of Contents
+
+- [Project Setup](#project-setup)
+- [Architecture](#architecture)
+- [Folder Structure](#folder-structure)
+- [Packages Used](#packages-used)
+- [Configuration (API keys, Firebase, Payments)](#configuration)
+- [Running the App](#running-the-app)
+- [Building for Release](#building-for-release)
+- [Testing](#testing)
+- [Known Limitations / What's Stubbed](#known-limitations--whats-stubbed)
+
+---
+
+## Project Setup
+
+**Flutter version:** 3.35.3 (stable channel) · Dart 3.9.2 · `sdk: ^3.9.2`
+
+```bash
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs   # generates *.freezed.dart / *.g.dart
+flutter analyze
+flutter test
+```
+
+Generated code (`*.freezed.dart`, `*.g.dart`) is **not** committed to version control — run `build_runner` after every clone or after editing any `@freezed` model.
+
+## Architecture
+
+- **Flutter 3.35 stable**, Material 3, `flutter latest stable` APIs (no deprecated widgets).
+- **Riverpod** (`flutter_riverpod`) for state management — plain providers (no codegen) for fast iteration.
+- **go_router** with `StatefulShellRoute.indexedStack` for the bottom-navigation shell (Home / Products / Categories / Cart / Profile) plus a root navigator for full-screen routes (product detail, checkout, auth, settings…).
+- **Freezed + json_serializable** for immutable domain models (`Product`, `ProductCategory`, `ProductReview`, `Address`, `Order`, `AppUser`).
+- **Clean, feature-first architecture**: each feature under `lib/features/<feature>/{data,domain,presentation}` — domain defines interfaces, data implements them, presentation only depends on domain.
+- **Repository pattern** throughout — every data source (products, cart, auth, orders, addresses) is hidden behind an interface so the local/offline implementation can be swapped for a real backend without touching UI code.
+- **Dio** for networking, isolated in `core/network`, HTTPS-only enforced via interceptor, certificate-pinning-ready.
+- **Hive** for structured local persistence (cart, wishlist, orders, addresses, auth users) — chosen over SQLite for its simplicity and zero native code generation.
+- **flutter_secure_storage** for the auth session token (Android Keystore / iOS Keychain).
+- **easy_localization** for i18n (English / Arabic / Telugu) with automatic RTL for Arabic.
+- **responsive_framework** for adaptive breakpoints across phone/tablet/desktop/web.
+
+## Folder Structure
+
+```
+lib/
+  core/                      # cross-cutting: theme, router, network, storage, env, notifications, shared widgets
+    constants/               # brand + company info (real data from nnfoodsandspices.com)
+    env/                     # compile-time config (--dart-define-from-file=env.json)
+    error/                   # Result<T> / AppFailure
+    localization/
+    network/                 # DioClient
+    notifications/           # local notifications + guarded Firebase Messaging
+    router/                  # go_router config + bottom-nav shell
+    storage/                 # Hive box registry
+    theme/                   # AppColors, AppTheme (light/dark), ThemeMode provider
+    widgets/                 # ProductCard, ProductImage, shimmer loaders, WhatsApp FAB…
+  features/
+    auth/                    # login/register/OTP/social-login (local auth repository)
+    cart/                    # cart state (Hive-backed) + totals/coupon logic
+    categories/
+    checkout/                # address, payment method abstraction, order placement
+    home/
+    notifications/
+    products/                # domain + local seed data + WooCommerce-ready remote repository
+    profile/                 # orders, addresses, account hub
+    search/                  # realtime search, history, voice search, barcode scan
+    settings/                # theme/language/currency, about, contact, legal
+    splash/
+    wishlist/
+tool/
+  generate_icon.py           # generates the app icon / adaptive-icon / splash assets (Pillow)
+assets/
+  icon/                      # generated app icon (full-bleed + adaptive foreground)
+  splash/                    # generated splash mark
+  translations/              # en.json / ar.json / te.json
+test/                        # unit + widget tests
+integration_test/            # full-app boot → navigation integration test
+```
+
+## Packages Used
+
+| Purpose | Package |
+|---|---|
+| State management | `flutter_riverpod` |
+| Routing | `go_router` |
+| Models | `freezed_annotation`, `json_annotation` (+ `build_runner`, `freezed`, `json_serializable`) |
+| Networking | `dio`, `pretty_dio_logger`, `connectivity_plus` |
+| Local storage | `hive`, `hive_flutter`, `shared_preferences`, `flutter_secure_storage` |
+| Images / loading | `cached_network_image`, `shimmer`, `skeletonizer` |
+| Carousel / UI | `carousel_slider`, `smooth_page_indicator`, `flutter_svg`, `lottie`, `photo_view`, `flutter_rating_bar`, `flutter_staggered_animations`, `badges`, `flutter_animate`, `google_fonts` |
+| Icons / splash generation | `flutter_launcher_icons`, `flutter_native_splash` |
+| Localization | `easy_localization`, `intl` |
+| Firebase (optional, guarded) | `firebase_core`, `firebase_messaging`, `firebase_analytics`, `firebase_crashlytics` |
+| Notifications | `flutter_local_notifications` |
+| Utilities | `equatable`, `url_launcher`, `share_plus`, `package_info_plus`, `device_info_plus`, `logger`, `uuid`, `crypto`, `webview_flutter`, `permission_handler`, `image_picker`, `mobile_scanner`, `speech_to_text`, `in_app_review`, `flutter_slidable` |
+| Responsive layout | `responsive_framework` |
+| Testing | `flutter_test`, `integration_test`, `mockito` |
+
+## Configuration
+
+The app runs **fully featured out of the box** against a local seed catalog (35 real products scraped from the live site's category pages) and Cash-on-Delivery checkout — no keys required.
+
+To connect real services, create `env.json` (git-ignored) from `env.example.json` and pass it at build/run time:
+
+```bash
+flutter run --dart-define-from-file=env.json
+flutter build apk --release --dart-define-from-file=env.json
+```
+
+| Key | Enables |
+|---|---|
+| `WOOCOMMERCE_BASE_URL` / `WOOCOMMERCE_CONSUMER_KEY` / `WOOCOMMERCE_CONSUMER_SECRET` | Live product catalog via the WooCommerce REST API (nnfoodsandspices.com runs WordPress/WooCommerce) instead of local seed data |
+| `RAZORPAY_KEY` | Razorpay checkout |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe checkout |
+| `PAYTABS_PROFILE_ID` | PayTabs checkout |
+
+### Firebase (push notifications, analytics, crashlytics)
+
+Not configured in this build (no project was provisioned). To enable:
+
+1. Create a Firebase project and register the Android (`com.nnfoodsandspices.app`) and iOS apps.
+2. Drop `google-services.json` into `android/app/` and `GoogleService-Info.plist` into `ios/Runner/` and `macos/Runner/` (already git-ignored).
+3. Run `flutterfire configure` to generate `lib/firebase_options.dart`, or wire it manually in `core/notifications/notification_service.dart`.
+
+Without this, the app still works normally — `NotificationService` catches the missing-config error and simply disables FCM, while local notifications keep working.
+
+### Social Sign-In (Google / Apple / Facebook)
+
+Requires the Firebase setup above plus OAuth client IDs (Google), an App ID (Facebook), and Sign in with Apple entitlements (iOS). Until configured, tapping these buttons shows a clear "not configured" message rather than failing silently.
+
+### Android release signing
+
+Create `android/key.properties` (git-ignored, see `android/key.properties.example`) pointing at your production keystore. Without it, release builds fall back to the debug signing config so `flutter build apk --release` still succeeds locally.
+
+## Running the App
+
+```bash
+flutter run -d chrome              # Web
+flutter run -d windows             # Windows desktop
+flutter run                        # Android (device/emulator)
+```
+
+iOS/macOS require Xcode on a Mac; Linux desktop requires a Linux host — both are configured (icons, bundle IDs, entitlements) but were not compiled in this environment (Windows only). See [Known Limitations](#known-limitations--whats-stubbed).
+
+## Building for Release
+
+```bash
+# Android
+flutter build apk --release
+flutter build appbundle --release   # Play Store AAB
+
+# Web
+flutter build web --release
+
+# Windows
+flutter build windows --release
+
+# iOS (requires macOS + Xcode)
+flutter build ipa --release
+
+# macOS (requires macOS + Xcode)
+flutter build macos --release
+
+# Linux (requires a Linux host)
+flutter build linux --release
+```
+
+## Testing
+
+```bash
+flutter test                                   # unit + widget tests
+flutter test integration_test/app_test.dart    # full-app integration test (needs a device/Chrome)
+```
+
+Coverage includes: `Result`/`AppFailure` unit tests, `LocalProductRepository` filtering/sorting/pagination, cart totals & coupon math (via `ProviderContainer` overrides), a `SplashScreen` widget test, a `HomeScreen` widget test, and an integration test that boots the app through the splash screen and exercises bottom-navigation.
+
+## Known Limitations / What's Stubbed
+
+Built honestly rather than faked — here's exactly what needs real credentials or a different host OS before it's "live":
+
+- **iOS / macOS builds**: configured correctly (Info.plist, bundle ID, icons, entitlements) but not compiled — this session ran on Windows, which has no Xcode.
+- **Linux desktop build**: configured but not compiled — needs a Linux host toolchain.
+- **Live product catalog**: nnfoodsandspices.com is WordPress/WooCommerce with no public API key available to this build. `LocalProductRepository` serves the real scraped category/product names (35 products) with representative pricing; `WooCommerceProductRepository` is fully implemented and activates automatically once API credentials are supplied (see [Configuration](#configuration)).
+- **Payments**: Cash on Delivery works end-to-end. Razorpay/Stripe/PayTabs/Google Pay/Apple Pay have a real `PaymentService` abstraction wired into checkout, but report "not configured" until real merchant keys/entitlements are added — no fake success responses.
+- **Firebase (push notifications, analytics, crashlytics, social sign-in)**: architecture is in place and fails gracefully without config; needs a real Firebase project to activate.
+- **OTP**: functional end-to-end using a demo code shown on-screen (no SMS gateway is configured) — swap in Firebase Phone Auth / MSG91 / Twilio for production.
+- **Localization**: full `easy_localization` + RTL infrastructure is wired (English/Arabic/Telugu), with bottom navigation and key auth/settings strings translated. Translating every remaining in-app string is a content task — add keys to `assets/translations/*.json`, no code changes required.
+- **Legal pages** (Terms & Privacy Policy): real, complete standard e-commerce boilerplate — have counsel review before production launch.

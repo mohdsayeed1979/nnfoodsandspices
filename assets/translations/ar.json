@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "products": "المنتجات",
+    "categories": "الفئات",
+    "cart": "السلة",
+    "profile": "حسابي"
+  },
+  "common": {
+    "search": "بحث",
+    "addToCart": "أضف إلى السلة",
+    "buyNow": "اشتر الآن",
+    "checkout": "الدفع",
+    "viewAll": "عرض الكل",
+    "retry": "إعادة المحاولة",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "apply": "تطبيق",
+    "reset": "إعادة تعيين",
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "logOut": "تسجيل الخروج",
+    "continueAsGuest": "المتابعة كضيف"
+  },
+  "splash": {
+    "tagline": "١٠٠٪ توابل نقية طبيعية"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "currency": "العملة",
+    "notifications": "الإشعارات",
+    "theme": "المظهر",
+    "about": "من نحن",
+    "terms": "الشروط والأحكام",
+    "privacy": "سياسة الخصوصية",
+    "version": "إصدار التطبيق"
+  }
+}

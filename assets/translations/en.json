@@ -1,0 +1,39 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "categories": "Categories",
+    "cart": "Cart",
+    "profile": "Profile"
+  },
+  "common": {
+    "search": "Search",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now",
+    "checkout": "Checkout",
+    "viewAll": "View All",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "apply": "Apply",
+    "reset": "Reset",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "logOut": "Log Out",
+    "continueAsGuest": "Continue as Guest"
+  },
+  "splash": {
+    "tagline": "100% Naturally Pure Spices"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "currency": "Currency",
+    "notifications": "Notifications",
+    "theme": "Theme",
+    "about": "About Us",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "version": "App Version"
+  }
+}
