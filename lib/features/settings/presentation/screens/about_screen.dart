@@ -14,12 +14,9 @@ class AboutScreen extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         children: [
           Center(
-            child: Container(
-              width: 100,
-              height: 100,
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(color: AppColors.primaryGreen, shape: BoxShape.circle),
-              child: Image.asset('assets/splash/splash_logo.png'),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset('assets/splash/splash_logo.png', width: 100, height: 100),
             ),
           ),
           const SizedBox(height: 16),

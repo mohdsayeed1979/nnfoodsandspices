@@ -1,4 +1,4 @@
-package com.nnfoodsandspices.nn_food_spices
+package com.nnfoodsandspices.app
 
 import io.flutter.embedding.android.FlutterActivity
 

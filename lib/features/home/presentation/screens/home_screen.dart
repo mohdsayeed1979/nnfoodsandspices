@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/product_card.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../../../../core/widgets/shimmer_box.dart';
@@ -40,12 +39,9 @@ class HomeScreen extends ConsumerWidget {
               titleSpacing: 16,
               title: Row(
                 children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: const BoxDecoration(color: AppColors.primaryGreen, shape: BoxShape.circle),
-                    padding: const EdgeInsets.all(5),
-                    child: Image.asset('assets/splash/splash_logo.png'),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset('assets/splash/splash_logo.png', width: 34, height: 34),
                   ),
                   const SizedBox(width: 10),
                   const Expanded(

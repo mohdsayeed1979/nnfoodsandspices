@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/social_login_buttons.dart';
 
@@ -54,12 +53,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: ListView(
               children: [
                 const SizedBox(height: 16),
-                Container(
-                  width: 84,
-                  height: 84,
-                  padding: const EdgeInsets.all(14),
-                  decoration: const BoxDecoration(color: AppColors.primaryGreen, shape: BoxShape.circle),
-                  child: Image.asset('assets/splash/splash_logo.png'),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: Image.asset('assets/splash/splash_logo.png', width: 84, height: 84),
                 ),
                 const SizedBox(height: 20),
                 const Text('Welcome Back', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
