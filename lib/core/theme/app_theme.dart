@@ -22,7 +22,7 @@ abstract final class AppTheme {
   static ThemeData _build({required Brightness brightness}) {
     final isDark = brightness == Brightness.dark;
     final background = isDark ? AppColors.darkBackground : AppColors.lightGrey;
-    final surface = isDark ? AppColors.darkSurface : AppColors.secondaryWhite;
+    final surface = isDark ? AppColors.darkSurface : AppColors.cardSurface;
     final onSurface = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
     final colorScheme = ColorScheme(

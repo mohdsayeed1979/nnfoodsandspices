@@ -13,6 +13,10 @@ abstract final class AppColors {
   static const darkBackground = Color(0xFF1A1A1A);
   static const lightGrey = Color(0xFFEAEAEA);
 
+  /// Warm off-white used for card/surface backgrounds — softer than pure
+  /// white so cards don't look stark/clinical against the app background.
+  static const cardSurface = Color(0xFFFDFBF6);
+
   static const darkSurface = Color(0xFF242424);
   static const darkSurfaceAlt = Color(0xFF2E2E2E);
 
