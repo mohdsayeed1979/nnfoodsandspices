@@ -34,14 +34,14 @@ class CategoryQuickList extends ConsumerWidget {
       children: [
         SectionHeader(title: 'Shop by Category', onViewAll: () => context.push(AppRoutes.categories)),
         SizedBox(
-          height: 104,
+          height: 92,
           child: categoriesAsync.when(
             loading: () => ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: 4,
               separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, __) => const ShimmerBox(width: 84, height: 104, borderRadius: 16),
+              itemBuilder: (_, __) => const ShimmerBox(width: 74, height: 92, borderRadius: 16),
             ),
             error: (e, _) => const SizedBox(),
             data: (categories) => ListView.separated(
@@ -56,25 +56,25 @@ class CategoryQuickList extends ConsumerWidget {
                 return GestureDetector(
                   onTap: () => context.push(AppRoutes.categoryProductsPath(c.id)),
                   child: SizedBox(
-                    width: 84,
+                    width: 74,
                     child: Column(
                       children: [
                         Container(
-                          width: 64,
-                          height: 64,
+                          width: 54,
+                          height: 54,
                           decoration: BoxDecoration(
                             color: color.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(icon, color: color, size: 28),
+                          child: Icon(icon, color: color, size: 24),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         Text(
                           c.name,
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),

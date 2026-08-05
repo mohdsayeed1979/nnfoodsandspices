@@ -63,7 +63,7 @@ class ProductCard extends ConsumerWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+            padding: const EdgeInsets.fromLTRB(9, 7, 9, 9),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -71,11 +71,11 @@ class ProductCard extends ConsumerWidget {
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, height: 1.25),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, height: 1.2),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 _ratingRow(context),
-                const SizedBox(height: 6),
+                const SizedBox(height: 5),
                 _priceAndAddRow(context, ref),
               ],
             ),
@@ -181,11 +181,11 @@ class ProductCard extends ConsumerWidget {
   Widget _ratingRow(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.star_rounded, size: 14, color: AppColors.ratingStar),
+        const Icon(Icons.star_rounded, size: 12.5, color: AppColors.ratingStar),
         const SizedBox(width: 2),
-        Text(product.rating.toStringAsFixed(1), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        Text(product.rating.toStringAsFixed(1), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600)),
         const SizedBox(width: 3),
-        Text('(${product.reviewCount})', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55))),
+        Text('(${product.reviewCount})', style: TextStyle(fontSize: 9.5, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55))),
       ],
     );
   }
@@ -202,7 +202,7 @@ class ProductCard extends ConsumerWidget {
                 child: Text(
                   '${AppConstants.currencySymbol}${product.price.toStringAsFixed(0)}',
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primaryGreen),
+                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.primaryGreen),
                 ),
               ),
               if (product.hasDiscount) ...[
@@ -212,7 +212,7 @@ class ProductCard extends ConsumerWidget {
                     '${AppConstants.currencySymbol}${product.compareAtPrice!.toStringAsFixed(0)}',
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 11.5,
+                      fontSize: 10.5,
                       decoration: TextDecoration.lineThrough,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),

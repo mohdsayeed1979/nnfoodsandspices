@@ -11,7 +11,7 @@ abstract final class AppColors {
 
   static const secondaryWhite = Color(0xFFFFFFFF);
   static const darkBackground = Color(0xFF1A1A1A);
-  static const lightGrey = Color(0xFFF5F5F5);
+  static const lightGrey = Color(0xFFEAEAEA);
 
   static const darkSurface = Color(0xFF242424);
   static const darkSurfaceAlt = Color(0xFF2E2E2E);

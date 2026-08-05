@@ -40,12 +40,12 @@ class HomeScreen extends ConsumerWidget {
               title: Row(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset('assets/splash/splash_logo.png', width: 34, height: 34),
+                    borderRadius: BorderRadius.circular(7),
+                    child: Image.asset('assets/splash/splash_logo.png', width: 30, height: 30),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 9),
                   const Expanded(
-                    child: Text(AppConstants.appName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    child: Text(AppConstants.appName, style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),
@@ -62,29 +62,29 @@ class HomeScreen extends ConsumerWidget {
                 child: _SearchBarField(onTap: () => context.push(AppRoutes.search)),
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 4)),
+            const SliverToBoxAdapter(child: SizedBox(height: 2)),
             const SliverToBoxAdapter(child: HeroBannerSlider()),
-            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
             const SliverToBoxAdapter(child: CategoryQuickList()),
-            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
             SliverToBoxAdapter(
               child: SectionHeader(title: 'Featured Products', onViewAll: () => context.push(AppRoutes.products)),
             ),
             SliverToBoxAdapter(child: _ProductRow(asyncProducts: featured)),
-            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
             SliverToBoxAdapter(
               child: SectionHeader(title: 'Latest Arrivals', onViewAll: () => context.push(AppRoutes.products)),
             ),
             SliverToBoxAdapter(child: _ProductRow(asyncProducts: latest)),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
             const SliverToBoxAdapter(child: WhyChooseUsSection()),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
             const SliverToBoxAdapter(child: RecipeIdeasSection()),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
             const SliverToBoxAdapter(child: TestimonialsSection()),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
             const SliverToBoxAdapter(child: SocialAndNewsSection()),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
             const SliverToBoxAdapter(child: NewsletterSection()),
             const SliverToBoxAdapter(child: SizedBox(height: 12)),
             const SliverToBoxAdapter(child: HomeContactSection()),
@@ -109,22 +109,22 @@ class _SearchBarField extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4)),
           ),
           child: Row(
             children: [
-              Icon(Icons.search_rounded, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
-              const SizedBox(width: 10),
+              Icon(Icons.search_rounded, size: 20, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              const SizedBox(width: 9),
               Expanded(
                 child: Text(
                   'Search for spices, masalas...',
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 13.5),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 12.5),
                 ),
               ),
-              Icon(Icons.mic_none_rounded, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              Icon(Icons.mic_none_rounded, size: 20, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
             ],
           ),
         ),
@@ -140,14 +140,14 @@ class _ProductRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 248,
+      height: 220,
       child: asyncProducts.when(
         loading: () => ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: 4,
           separatorBuilder: (_, __) => const SizedBox(width: 12),
-          itemBuilder: (_, __) => const ShimmerBox(width: 165, height: 248, borderRadius: 16),
+          itemBuilder: (_, __) => const ShimmerBox(width: 148, height: 220, borderRadius: 16),
         ),
         error: (e, _) => Center(child: Text('Could not load products', style: TextStyle(color: Theme.of(context).colorScheme.error))),
         data: (products) {
@@ -159,7 +159,7 @@ class _ProductRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: products.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, i) => SizedBox(width: 165, child: ProductCard(product: products[i])),
+            itemBuilder: (context, i) => SizedBox(width: 148, child: ProductCard(product: products[i])),
           );
         },
       ),

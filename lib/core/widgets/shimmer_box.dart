@@ -44,7 +44,7 @@ class ProductGridShimmer extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 14,
         crossAxisSpacing: 14,
-        childAspectRatio: 0.62,
+        childAspectRatio: 0.66,
       ),
       itemBuilder: (context, index) => const ShimmerBox(borderRadius: 16),
     );

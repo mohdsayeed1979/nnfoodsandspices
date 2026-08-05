@@ -392,7 +392,7 @@ class _RelatedProducts extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final relatedAsync = ref.watch(relatedProductsProvider(productId));
     return SizedBox(
-      height: 248,
+      height: 220,
       child: relatedAsync.when(
         loading: () => const SizedBox(),
         error: (e, _) => const SizedBox(),
@@ -403,7 +403,7 @@ class _RelatedProducts extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: products.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, i) => SizedBox(width: 165, child: ProductCard(product: products[i])),
+            itemBuilder: (context, i) => SizedBox(width: 148, child: ProductCard(product: products[i])),
           );
         },
       ),

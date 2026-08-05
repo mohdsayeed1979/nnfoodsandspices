@@ -126,7 +126,7 @@ flutter build apk --release --dart-define-from-file=env.json
 
 Not configured in this build (no project was provisioned). To enable:
 
-1. Create a Firebase project and register the Android (`com.nnfoodsandspices.app`) and iOS apps.
+1. Create a Firebase project and register the Android (`com.nnfoodsandspices.mobile`) and iOS apps.
 2. Drop `google-services.json` into `android/app/` and `GoogleService-Info.plist` into `ios/Runner/` and `macos/Runner/` (already git-ignored).
 3. Run `flutterfire configure` to generate `lib/firebase_options.dart`, or wire it manually in `core/notifications/notification_service.dart`.
 

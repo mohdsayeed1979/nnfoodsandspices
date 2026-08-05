@@ -69,7 +69,7 @@ class _HeroBannerSliderState extends State<HeroBannerSlider> {
         CarouselSlider(
           carouselController: _controller,
           options: CarouselOptions(
-            height: 170,
+            height: 148,
             viewportFraction: 0.92,
             autoPlay: true,
             autoPlayInterval: const Duration(seconds: 5),
@@ -83,9 +83,9 @@ class _HeroBannerSliderState extends State<HeroBannerSlider> {
                   : context.push(AppRoutes.categoryProductsPath(banner.categoryId!)),
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 6),
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(18),
                   gradient: LinearGradient(
                     colors: banner.colors,
                     begin: Alignment.topLeft,
@@ -96,8 +96,8 @@ class _HeroBannerSliderState extends State<HeroBannerSlider> {
                   children: [
                     Positioned(
                       right: -10,
-                      bottom: -20,
-                      child: Icon(banner.icon, size: 110, color: Colors.white.withValues(alpha: 0.15)),
+                      bottom: -16,
+                      child: Icon(banner.icon, size: 88, color: Colors.white.withValues(alpha: 0.15)),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,23 +105,27 @@ class _HeroBannerSliderState extends State<HeroBannerSlider> {
                       children: [
                         Text(
                           banner.title,
-                          style: const TextStyle(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w700, height: 1.2),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700, height: 1.15),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 5),
                         Text(
                           banner.subtitle,
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 11.5, height: 1.3),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 12),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
                             banner.cta,
-                            style: TextStyle(color: banner.colors.last, fontSize: 12.5, fontWeight: FontWeight.w700),
+                            style: TextStyle(color: banner.colors.last, fontSize: 11.5, fontWeight: FontWeight.w700),
                           ),
                         ),
                       ],

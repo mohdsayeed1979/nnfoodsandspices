@@ -134,13 +134,16 @@ abstract final class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
+        height: 64,
         indicatorColor: AppColors.primaryGreen.withValues(alpha: 0.15),
+        iconTheme: const WidgetStatePropertyAll(IconThemeData(size: 22)),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
-            fontSize: 12,
+            fontSize: 10.5,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             color: selected ? AppColors.primaryGreen : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+            overflow: TextOverflow.ellipsis,
           );
         }),
       ),

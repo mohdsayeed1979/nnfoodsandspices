@@ -10,7 +10,7 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -18,12 +18,12 @@ class SectionHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+                Text(title, style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w700)),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
                   Text(
                     subtitle!,
-                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+                    style: TextStyle(fontSize: 11.5, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
                   ),
                 ],
               ],
@@ -32,9 +32,13 @@ class SectionHeader extends StatelessWidget {
           if (onViewAll != null)
             TextButton(
               onPressed: onViewAll,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                textStyle: const TextStyle(fontSize: 12.5),
+              ),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [Text('View All'), Icon(Icons.arrow_forward_ios_rounded, size: 12)],
+                children: [Text('View All'), SizedBox(width: 2), Icon(Icons.arrow_forward_ios_rounded, size: 11)],
               ),
             ),
         ],
