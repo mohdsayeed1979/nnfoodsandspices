@@ -1,13 +1,28 @@
-# NN Food & Spices
+<div align="center">
 
-Premium Flutter application for **[Nujju's Nest Spices Pvt. Ltd.](https://nnfoodsandspices.com)** — one codebase targeting Android, iPhone/iPad, Windows, macOS, Linux and Web.
+# 🌶️ NN Food & Spices
 
-> 100% Naturally Pure Spices
+**100% Naturally Pure Spices** — a premium cross-platform Flutter app for **[Nujju's Nest Spices Pvt. Ltd.](https://nnfoodsandspices.com)**
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.35.3-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.9.2-0175C2?logo=dart&logoColor=white)](https://dart.dev)
+[![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Web-5E9C2C)](#supported-platforms)
+[![Architecture](https://img.shields.io/badge/Architecture-Clean%20%2F%20Feature--First-F36B21)](#architecture)
+[![State Management](https://img.shields.io/badge/State-Riverpod-40C4FF?logo=riverpod&logoColor=white)](https://riverpod.dev)
+[![License](https://img.shields.io/badge/License-Proprietary-lightgrey)](LICENSE)
+
+[Privacy Policy](https://mohdsayeed1979.github.io/nnfoodsandspices/privacy-policy.html) · [Website](https://nnfoodsandspices.com) · [Report an Issue](https://github.com/mohdsayeed1979/nnfoodsandspices/issues)
+
+</div>
 
 ---
 
 ## Table of Contents
 
+- [Description](#description)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Supported Platforms](#supported-platforms)
 - [Project Setup](#project-setup)
 - [Architecture](#architecture)
 - [Folder Structure](#folder-structure)
@@ -17,6 +32,50 @@ Premium Flutter application for **[Nujju's Nest Spices Pvt. Ltd.](https://nnfood
 - [Building for Release](#building-for-release)
 - [Testing](#testing)
 - [Known Limitations / What's Stubbed](#known-limitations--whats-stubbed)
+- [License](#license)
+- [Developer](#developer)
+
+---
+
+## Description
+
+NN Food & Spices is the official ordering app for **Nujju's Nest Spices Pvt. Ltd.**, an ISO 9001:2005 certified,
+GMP & Halal certified spice manufacturer with over a century of family blending tradition. The app is built from
+a single Flutter codebase and ships to **Android, iPhone/iPad, Windows, macOS, Linux, and Web** with a clean,
+feature-first architecture designed to plug into a real backend (WooCommerce, payment gateways, Firebase) without
+touching UI code.
+
+## Features
+
+- 🏠 Premium home page — hero banner, categories, featured/latest products, testimonials, recipes, newsletter
+- 🔍 Real-time search with voice search and barcode scanning
+- 🛍️ Product catalog with grid/list views, filtering, sorting, wishlist
+- 🛒 Cart with coupons, shipping calculation, and a real checkout flow
+- 👤 Auth (email/password + phone OTP), guest checkout, order history, saved addresses
+- 🌗 Light / dark / system theming (Material 3)
+- 🌍 English, Arabic, and Telugu localization with RTL support
+- 🔔 Local notifications, Firebase Cloud Messaging-ready
+- 💳 Payment architecture ready for Razorpay, Stripe, PayTabs, Google Pay, Apple Pay
+- 📴 Offline-friendly — Hive-backed cart/wishlist/orders/addresses persist locally
+
+## Screenshots
+
+| Home | Product Detail | Cart | Profile |
+|---|---|---|---|
+| _add screenshot_ | _add screenshot_ | _add screenshot_ | _add screenshot_ |
+
+> Screenshots go in `docs/screenshots/` — replace the placeholders above with `![Home](docs/screenshots/home.png)` etc. once captured from a real device/emulator.
+
+## Supported Platforms
+
+| Platform | Status |
+|---|---|
+| Android | ✅ Builds & runs (APK/AAB verified on device) |
+| Web | ✅ Builds & runs |
+| Windows | ✅ Builds & runs |
+| iOS | ⚙️ Configured — requires macOS + Xcode to compile |
+| macOS | ⚙️ Configured — requires macOS + Xcode to compile |
+| Linux | ⚙️ Configured — requires a Linux host to compile |
 
 ---
 
@@ -25,6 +84,8 @@ Premium Flutter application for **[Nujju's Nest Spices Pvt. Ltd.](https://nnfood
 **Flutter version:** 3.35.3 (stable channel) · Dart 3.9.2 · `sdk: ^3.9.2`
 
 ```bash
+git clone https://github.com/mohdsayeed1979/nnfoodsandspices.git
+cd nnfoodsandspices
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # generates *.freezed.dart / *.g.dart
 flutter analyze
@@ -77,12 +138,15 @@ lib/
     wishlist/
 tool/
   generate_icon.py           # generates the app icon / adaptive-icon / splash assets (Pillow)
+  apply_customer_logo.py     # processes the real company logo into icon/splash assets
 assets/
-  icon/                      # generated app icon (full-bleed + adaptive foreground)
-  splash/                    # generated splash mark
+  icon/                      # app icon (full-bleed + adaptive foreground)
+  splash/                    # splash mark
   translations/              # en.json / ar.json / te.json
 test/                        # unit + widget tests
 integration_test/            # full-app boot → navigation integration test
+privacy-policy.html          # published via GitHub Pages
+index.html                   # GitHub Pages landing page
 ```
 
 ## Packages Used
@@ -138,7 +202,16 @@ Requires the Firebase setup above plus OAuth client IDs (Google), an App ID (Fac
 
 ### Android release signing
 
-Create `android/key.properties` (git-ignored, see `android/key.properties.example`) pointing at your production keystore. Without it, release builds fall back to the debug signing config so `flutter build apk --release` still succeeds locally.
+A real production upload keystore is required for release builds. Create `android/key.properties` (git-ignored, see `android/key.properties.example`) pointing at your keystore:
+
+```properties
+storePassword=...
+keyPassword=...
+keyAlias=...
+storeFile=/absolute/path/to/upload-keystore.jks
+```
+
+Without it, release builds fall back to the debug signing config so `flutter build apk --release` still succeeds locally — but that build **cannot** be uploaded to Play Console as-is.
 
 ## Running the App
 
@@ -148,7 +221,7 @@ flutter run -d windows             # Windows desktop
 flutter run                        # Android (device/emulator)
 ```
 
-iOS/macOS require Xcode on a Mac; Linux desktop requires a Linux host — both are configured (icons, bundle IDs, entitlements) but were not compiled in this environment (Windows only). See [Known Limitations](#known-limitations--whats-stubbed).
+iOS/macOS require Xcode on a Mac; Linux desktop requires a Linux host — both are configured (icons, bundle IDs, entitlements) but require that host OS to compile.
 
 ## Building for Release
 
@@ -186,11 +259,24 @@ Coverage includes: `Result`/`AppFailure` unit tests, `LocalProductRepository` fi
 
 Built honestly rather than faked — here's exactly what needs real credentials or a different host OS before it's "live":
 
-- **iOS / macOS builds**: configured correctly (Info.plist, bundle ID, icons, entitlements) but not compiled — this session ran on Windows, which has no Xcode.
-- **Linux desktop build**: configured but not compiled — needs a Linux host toolchain.
+- **iOS / macOS builds**: configured correctly (Info.plist, bundle ID, icons, entitlements) but require a Mac with Xcode to compile.
+- **Linux desktop build**: configured but requires a Linux host toolchain to compile.
 - **Live product catalog**: nnfoodsandspices.com is WordPress/WooCommerce with no public API key available to this build. `LocalProductRepository` serves the real scraped category/product names (35 products) with representative pricing; `WooCommerceProductRepository` is fully implemented and activates automatically once API credentials are supplied (see [Configuration](#configuration)).
 - **Payments**: Cash on Delivery works end-to-end. Razorpay/Stripe/PayTabs/Google Pay/Apple Pay have a real `PaymentService` abstraction wired into checkout, but report "not configured" until real merchant keys/entitlements are added — no fake success responses.
 - **Firebase (push notifications, analytics, crashlytics, social sign-in)**: architecture is in place and fails gracefully without config; needs a real Firebase project to activate.
 - **OTP**: functional end-to-end using a demo code shown on-screen (no SMS gateway is configured) — swap in Firebase Phone Auth / MSG91 / Twilio for production.
 - **Localization**: full `easy_localization` + RTL infrastructure is wired (English/Arabic/Telugu), with bottom navigation and key auth/settings strings translated. Translating every remaining in-app string is a content task — add keys to `assets/translations/*.json`, no code changes required.
 - **Legal pages** (Terms & Privacy Policy): real, complete standard e-commerce boilerplate — have counsel review before production launch.
+
+## License
+
+This project is **proprietary** — All Rights Reserved. See [LICENSE](LICENSE) for details. The repository is public
+for portfolio and collaboration purposes only; no license to use, copy, or redistribute this code is granted.
+
+## Developer
+
+Built for **Nujju's Nest Spices Pvt. Ltd.**
+
+- 🌐 [nnfoodsandspices.com](https://nnfoodsandspices.com)
+- 📧 [nnfoodandspices@gmail.com](mailto:nnfoodandspices@gmail.com)
+- 📱 [Facebook](https://facebook.com/nnfoodandspices) · [Instagram](https://instagram.com/nnfoodandspices/) · [YouTube](https://youtube.com/@anzanz314)
