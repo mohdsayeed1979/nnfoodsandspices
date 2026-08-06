@@ -2,7 +2,7 @@ name: nn_food_spices
 description: "NN Food & Spices - Premium 100% Naturally Pure Spices"
 publish_to: 'none'
 
-version: 1.0.2+3
+version: 1.0.3+4
 
 environment:
   sdk: ^3.9.2
