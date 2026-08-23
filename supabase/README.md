@@ -27,10 +27,15 @@ Then create the admin **auth** user with the bootstrap script — see
 `admin-web/README.md` (it needs the service-role key and cannot be a plain SQL
 migration).
 
-### Option A — SQL Editor (simplest)
+### Option A — SQL Editor (simplest, no install)
 
 1. Open the project → **SQL Editor** → **New query**.
-2. Paste the contents of `001_…` and click **Run**. Repeat for 002, 003, 004.
+2. Paste the whole of **`apply_all.sql`** (all four migrations, unchanged and
+   concatenated for one-paste convenience) → **Run**.
+   *(Or paste `001_…`, `002_…`, `003_…`, `004_…` one at a time in order.)*
+3. New query → paste **`verify.sql`** → **Run** to confirm the setup
+   (tables, RLS on, policy counts, bucket, indexes, **4 categories / 48
+   products**, per-category counts, and a sample price-mapping row).
 
 ### Option B — Supabase CLI
 

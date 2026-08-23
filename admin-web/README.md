@@ -72,6 +72,21 @@ npm run lint
 npm run build
 ```
 
+## 5b. Live security verification (auth + RLS)
+
+After migrations are applied and the admin exists, run the real security
+harness — it uses only the public anon key + a real admin login (never the
+service-role key), and prints PASS/FAIL for each check:
+
+```bash
+npm run verify-live
+```
+
+It verifies: anon can read active products/categories; anon **cannot**
+insert/update/delete (RLS); admin login works; wrong password is rejected;
+admin **can** insert/update/delete products and categories. Temp rows it
+creates are deleted at the end — no leftovers.
+
 ## 6. Deploy to Vercel
 
 1. Push this repo to GitHub (already done — see the main README).
