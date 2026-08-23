@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  color: #1f2417;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition;
+  }
+  .btn-primary {
+    @apply btn bg-brand-green text-white hover:bg-brand-greenDark;
+  }
+  .btn-outline {
+    @apply btn border border-brand-green/30 bg-white text-brand-greenDark hover:bg-brand-green/5;
+  }
+  .btn-whatsapp {
+    @apply btn bg-[#25D366] text-white hover:brightness-95;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+  }
+  .card {
+    @apply overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-card;
+  }
+  .input {
+    @apply w-full rounded-full border border-gray-300 bg-white px-4 py-2 text-sm outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green;
+  }
+  .prose-legal h2 {
+    @apply mt-8 text-lg font-bold text-brand-greenDark;
+  }
+  .prose-legal p {
+    @apply mt-2 text-sm leading-relaxed text-gray-600;
+  }
+  .prose-legal ul {
+    @apply mt-2 list-disc pl-6 text-sm leading-relaxed text-gray-600;
+  }
+}
