@@ -7,6 +7,7 @@ import 'core/constants/app_constants.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/hive_service.dart';
+import 'core/supabase/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 
@@ -14,6 +15,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   await HiveService.init();
+  // Connects to the live Supabase catalog when SUPABASE_URL + anon key are
+  // provided via --dart-define; otherwise a no-op and the app uses the
+  // bundled seed catalog. Never throws out — a backend outage must not
+  // block app startup.
+  await SupabaseConfig.initIfConfigured();
   // Fire-and-forget: local notifications always succeed, Firebase Cloud
   // Messaging silently stays disabled until a real project is wired up —
   // neither should block app startup.

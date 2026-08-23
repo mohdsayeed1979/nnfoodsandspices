@@ -9,6 +9,8 @@
 [![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Web-5E9C2C)](#supported-platforms)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%2F%20Feature--First-F36B21)](#architecture)
 [![State Management](https://img.shields.io/badge/State-Riverpod-40C4FF?logo=riverpod&logoColor=white)](https://riverpod.dev)
+[![Backend](https://img.shields.io/badge/Backend-Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Admin](https://img.shields.io/badge/Admin-Next.js%20%2F%20Vercel-000000?logo=next.js&logoColor=white)](admin-web)
 [![License](https://img.shields.io/badge/License-Proprietary-lightgrey)](LICENSE)
 
 [Privacy Policy](https://mohdsayeed1979.github.io/nnfoodsandspices/privacy-policy.html) · [Website](https://nnfoodsandspices.com) · [Report an Issue](https://github.com/mohdsayeed1979/nnfoodsandspices/issues)
@@ -21,6 +23,7 @@
 
 - [Description](#description)
 - [Features](#features)
+- [Live Catalog: Supabase Backend + Admin Panel](#live-catalog-supabase-backend--admin-panel)
 - [Screenshots](#screenshots)
 - [Supported Platforms](#supported-platforms)
 - [Project Setup](#project-setup)
@@ -57,6 +60,45 @@ touching UI code.
 - 🔔 Local notifications, Firebase Cloud Messaging-ready
 - 💳 Payment architecture ready for Razorpay, Stripe, PayTabs, Google Pay, Apple Pay
 - 📴 Offline-friendly — Hive-backed cart/wishlist/orders/addresses persist locally
+
+## Live Catalog: Supabase Backend + Admin Panel
+
+The product catalog is backed by **Supabase** (PostgreSQL + Auth + Storage) and
+managed through a **Next.js admin panel** deployed to Vercel. An admin edits
+products/prices/images in the panel → Supabase updates → the mobile app shows
+the new data on next launch / pull-to-refresh — **no new Play Store release
+needed** for catalog changes.
+
+```
+Flutter app ──reads──►  Supabase (Postgres + Auth + Storage)  ◄──writes──  Admin Web Panel (Next.js/Vercel)
+                              RLS-enforced                                   admin-only, real auth
+```
+
+| Piece | Location | Docs |
+|-------|----------|------|
+| Database schema, RLS, storage, seed | [`supabase/`](supabase/) | [`supabase/README.md`](supabase/README.md) |
+| Admin web panel (Next.js + TS + Tailwind) | [`admin-web/`](admin-web/) | [`admin-web/README.md`](admin-web/README.md) |
+| Flutter data source | `lib/features/products/data/supabase_product_repository.dart` | this file |
+
+**Flutter integration.** `productRepositoryProvider` selects the data source in
+priority order: **Supabase** (when `SUPABASE_URL` + anon key are supplied) →
+**WooCommerce** → **bundled seed catalog** (zero-config default). The app depends
+only on the `ProductRepository` interface, so switching sources needs no UI
+changes. Run against the live catalog with:
+
+```bash
+flutter run --dart-define-from-file=env.json     # env.json carries SUPABASE_URL + SUPABASE_ANON_KEY
+```
+
+The DB `slug` is used as the app's `Product.id`, so existing on-device
+carts/wishlists keep working. If Supabase is unreachable the app shows a
+friendly error / cached data and never crashes; if no keys are configured it
+runs on the bundled seed catalog exactly as before.
+
+> **Setup order:** apply `supabase/` migrations 001→004, run
+> `admin-web` `npm run bootstrap-admin` to create the admin user, deploy
+> `admin-web` to Vercel, then build the app with the Supabase keys. Full
+> step-by-step is in the two sub-READMEs above.
 
 ## Screenshots
 

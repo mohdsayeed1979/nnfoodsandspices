@@ -2,17 +2,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/env/app_env.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/supabase/supabase_config.dart';
 import '../../data/local_product_repository.dart';
+import '../../data/supabase_product_repository.dart';
 import '../../data/woocommerce_product_repository.dart';
 import '../../domain/product.dart';
 import '../../domain/product_category.dart';
 import '../../domain/product_repository.dart';
 import '../../domain/product_review.dart';
 
-/// Selects the live WooCommerce API when credentials are configured
-/// (`--dart-define-from-file=env.json`), otherwise falls back to the local
-/// seed catalog. The rest of the app depends only on [ProductRepository].
+/// Selects the catalog data source, in priority order:
+///   1. Supabase (live admin-managed catalog) when SUPABASE_URL + anon key
+///      are configured and initialized — see [SupabaseConfig].
+///   2. WooCommerce REST API when its credentials are configured.
+///   3. Bundled local seed catalog (zero-config default).
+/// The rest of the app depends only on [ProductRepository].
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
+  if (SupabaseConfig.isReady) {
+    return SupabaseProductRepository(SupabaseConfig.client);
+  }
   if (AppEnv.hasWooCommerceApi) {
     return WooCommerceProductRepository(DioClient.instance);
   }
