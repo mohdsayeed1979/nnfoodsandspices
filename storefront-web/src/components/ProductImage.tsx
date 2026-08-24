@@ -2,6 +2,7 @@
 // Intentional plain <img> for Supabase Storage URLs: avoids next/image's
 // remote-loader cost while still lazy-loading below the fold.
 import { initials } from '@/lib/format';
+import { resolveImageUrl } from '@/lib/images';
 
 const PALETTE: Record<string, [string, string]> = {
   'veg-spices': ['#7CB342', '#4A7D22'],
@@ -30,11 +31,11 @@ export function ProductImage({
   sizes?: string;
   priority?: boolean;
 }) {
-  if (src && src.startsWith('http')) {
-    // eslint-disable-next-line @next/next/no-img-element
+  const url = resolveImageUrl(src);
+  if (url) {
     return (
       <img
-        src={src}
+        src={url}
         alt={name}
         loading={priority ? 'eager' : 'lazy'}
         sizes={sizes}
