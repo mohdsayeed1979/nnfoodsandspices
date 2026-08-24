@@ -27,32 +27,45 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return LocalProductRepository();
 });
 
-final categoriesProvider = FutureProvider<List<ProductCategory>>((ref) async {
+// NOTE on autoDispose: the admin panel can change a product's data (image,
+// price, stock, etc.) at any time in Supabase. These providers are
+// `.autoDispose` so that once nothing is watching them (e.g. the product
+// detail screen was popped, or the Home tab's widgets were rebuilt from
+// scratch) their cached Future is discarded — the *next* time the screen is
+// opened it re-fetches fresh data instead of replaying a stale in-memory
+// result for the lifetime of the app process. Without this, a plain
+// FutureProvider caches its result forever (until the app is killed), so an
+// admin-side image swap would never show up in an already-open app session.
+// Home screen's featured/latest/categories providers stay mounted while
+// switching bottom-nav tabs (StatefulNavigationShell keeps branches alive),
+// so autoDispose alone won't refetch them on tab switches — that's why
+// home_screen.dart also explicitly invalidates them via pull-to-refresh.
+final categoriesProvider = FutureProvider.autoDispose<List<ProductCategory>>((ref) async {
   final result = await ref.watch(productRepositoryProvider).getCategories();
   return result.when(success: (data) => data, failure: (f) => throw f);
 });
 
-final featuredProductsProvider = FutureProvider<List<Product>>((ref) async {
+final featuredProductsProvider = FutureProvider.autoDispose<List<Product>>((ref) async {
   final result = await ref.watch(productRepositoryProvider).getFeaturedProducts();
   return result.when(success: (data) => data, failure: (f) => throw f);
 });
 
-final latestProductsProvider = FutureProvider<List<Product>>((ref) async {
+final latestProductsProvider = FutureProvider.autoDispose<List<Product>>((ref) async {
   final result = await ref.watch(productRepositoryProvider).getLatestProducts();
   return result.when(success: (data) => data, failure: (f) => throw f);
 });
 
-final productByIdProvider = FutureProvider.family<Product, String>((ref, id) async {
+final productByIdProvider = FutureProvider.autoDispose.family<Product, String>((ref, id) async {
   final result = await ref.watch(productRepositoryProvider).getProductById(id);
   return result.when(success: (data) => data, failure: (f) => throw f);
 });
 
-final relatedProductsProvider = FutureProvider.family<List<Product>, String>((ref, id) async {
+final relatedProductsProvider = FutureProvider.autoDispose.family<List<Product>, String>((ref, id) async {
   final result = await ref.watch(productRepositoryProvider).getRelatedProducts(id);
   return result.when(success: (data) => data, failure: (f) => throw f);
 });
 
-final reviewsProvider = FutureProvider.family<List<ProductReview>, String>((ref, id) async {
+final reviewsProvider = FutureProvider.autoDispose.family<List<ProductReview>, String>((ref, id) async {
   final result = await ref.watch(productRepositoryProvider).getReviews(id);
   return result.when(success: (data) => data, failure: (f) => throw f);
 });

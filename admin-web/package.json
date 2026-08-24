@@ -9,11 +9,12 @@
     "start": "next start",
     "lint": "next lint",
     "bootstrap-admin": "node scripts/bootstrap-admin.mjs",
-    "verify-live": "node scripts/verify-live.mjs"
+    "verify-live": "node scripts/verify-live.mjs",
+    "import-images": "node scripts/bulk-import-images.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.45.4",
+    "@supabase/supabase-js": "^2.112.3",
     "next": "14.2.33",
     "react": "18.3.1",
     "react-dom": "18.3.1"
@@ -26,6 +27,7 @@
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.33",
     "postcss": "8.4.47",
+    "sharp": "^0.35.3",
     "tailwindcss": "3.4.13",
     "typescript": "5.6.3"
   }

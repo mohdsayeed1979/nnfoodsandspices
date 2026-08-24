@@ -30,5 +30,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# bulk-import-images.mjs output — downloaded/processed images, backups and
+# per-run reports. Never committed: large binaries + can contain the full
+# pre-change DB snapshot. See scripts/bulk-import-images.mjs.
+/scripts/output/
+
 # typescript
 *.tsbuildinfo

@@ -10,6 +10,7 @@ import 'core/storage/hive_service.dart';
 import 'core/supabase/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'features/products/presentation/providers/product_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,11 +36,45 @@ Future<void> main() async {
   );
 }
 
-class NnFoodSpicesApp extends ConsumerWidget {
+class NnFoodSpicesApp extends ConsumerStatefulWidget {
   const NnFoodSpicesApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NnFoodSpicesApp> createState() => _NnFoodSpicesAppState();
+}
+
+class _NnFoodSpicesAppState extends ConsumerState<NnFoodSpicesApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // Mobile apps are far more often backgrounded than fully restarted — the
+  // OS keeps the process (and every cached Riverpod value) alive for days.
+  // Without this, an admin-side catalog change (new product image, price,
+  // stock) would never reach a session that's just resumed from the
+  // background, even though `.autoDispose` already fixes the
+  // navigate-away-and-back case. Invalidating on resume is lazy — it only
+  // clears the cached Future, the actual re-fetch happens naturally the next
+  // time a still-mounted widget (e.g. the Home screen) watches it again.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(featuredProductsProvider);
+      ref.invalidate(latestProductsProvider);
+      ref.invalidate(categoriesProvider);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
 

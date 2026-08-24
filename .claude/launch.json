@@ -4,7 +4,7 @@
     {
       "name": "nn_food_spices_web",
       "runtimeExecutable": "flutter",
-      "runtimeArgs": ["run", "-d", "chrome", "--web-port", "8765"],
+      "runtimeArgs": ["run", "-d", "chrome", "--web-port", "8765", "--dart-define-from-file=env.json"],
       "port": 8765
     }
   ]
