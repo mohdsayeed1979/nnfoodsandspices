@@ -1,6 +1,25 @@
 export type StockStatus = 'in_stock' | 'out_of_stock' | 'coming_soon';
 export type Role = 'admin' | 'viewer';
 
+/** One pack size + its customer-facing selling price, stored in the
+ * `products.pack_sizes` jsonb. Rows may still hold legacy plain strings,
+ * so the raw column type is a union the admin form normalizes on load. */
+export interface PackPrice {
+  size: string;
+  price: number;
+}
+export type PackSizeEntry = string | PackPrice;
+
+/** Standard pack multipliers off the 100g base — used only to pre-fill the
+ * editor when a product has no explicit per-size prices yet. Matches the
+ * Flutter app and storefront ladders. */
+export const PACK_MULTIPLIERS: Record<string, number> = {
+  '100g': 1.0,
+  '250g': 2.3,
+  '500g': 4.4,
+  '1kg': 8.0,
+};
+
 export interface Category {
   id: string;
   slug: string;
@@ -26,7 +45,7 @@ export interface Product {
   currency: string;
   image_url: string;
   additional_images: string[];
-  pack_sizes: string[];
+  pack_sizes: PackSizeEntry[];
   is_veg: boolean;
   is_active: boolean;
   is_featured: boolean;

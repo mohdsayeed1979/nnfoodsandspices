@@ -34,12 +34,15 @@ export function ProductImage({
   const url = resolveImageUrl(src);
   if (url) {
     return (
+      // object-contain (not cover): product packaging is portrait (~700x883);
+      // cropping to a square would cut off the top/bottom of the box. Contain
+      // preserves the full packaging and aspect ratio on every surface.
       <img
         src={url}
         alt={name}
         loading={priority ? 'eager' : 'lazy'}
         sizes={sizes}
-        className={`h-full w-full object-cover ${className}`}
+        className={`h-full w-full object-contain p-2 ${className}`}
       />
     );
   }

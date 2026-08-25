@@ -10,6 +10,7 @@ import 'core/storage/hive_service.dart';
 import 'core/supabase/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'core/updates/app_update_service.dart';
 import 'features/products/presentation/providers/product_providers.dart';
 
 Future<void> main() async {
@@ -43,11 +44,18 @@ class NnFoodSpicesApp extends ConsumerStatefulWidget {
   ConsumerState<NnFoodSpicesApp> createState() => _NnFoodSpicesAppState();
 }
 
+final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 class _NnFoodSpicesAppState extends ConsumerState<NnFoodSpicesApp> with WidgetsBindingObserver {
+  late final AppUpdateService _updateService = AppUpdateService(_scaffoldMessengerKey);
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Check Google Play for a newer version once the first frame is up, so
+    // the check never delays startup. No-op on non-Android / debug builds.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateService.checkForUpdate());
   }
 
   @override
@@ -70,6 +78,9 @@ class _NnFoodSpicesAppState extends ConsumerState<NnFoodSpicesApp> with WidgetsB
       ref.invalidate(featuredProductsProvider);
       ref.invalidate(latestProductsProvider);
       ref.invalidate(categoriesProvider);
+      // Re-check for a Play Store update on resume (guarded so it won't
+      // re-prompt once an update has already been downloaded this session).
+      _updateService.checkForUpdate();
     }
   }
 
@@ -80,6 +91,7 @@ class _NnFoodSpicesAppState extends ConsumerState<NnFoodSpicesApp> with WidgetsB
 
     return MaterialApp.router(
       title: AppConstants.appName,
+      scaffoldMessengerKey: _scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

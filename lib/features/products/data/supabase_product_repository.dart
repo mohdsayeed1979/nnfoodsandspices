@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/error/result.dart';
+import '../domain/pack_price.dart';
 import '../domain/product.dart';
 import '../domain/product_category.dart';
 import '../domain/product_repository.dart';
@@ -53,7 +54,41 @@ class SupabaseProductRepository implements ProductRepository {
 
     final slug = row['slug'] as String;
     final gallery = (row['additional_images'] as List?)?.map((e) => e.toString()).toList() ?? const [];
-    final packSizes = (row['pack_sizes'] as List?)?.map((e) => e.toString()).toList();
+
+    // `pack_sizes` is the single source of truth for per-size pricing. It
+    // holds either the new shape [{size, price}] or a legacy plain-string
+    // array ["100g", ...]. Parse both: objects carry real prices; strings
+    // fall back to the multiplier ladder off the base selling price.
+    final rawPacks = row['pack_sizes'] as List?;
+    final sellingBase = sale ?? regular;
+    final packPricing = <PackPrice>[];
+    if (rawPacks != null) {
+      for (final entry in rawPacks) {
+        if (entry is Map) {
+          final size = entry['size']?.toString();
+          final priceVal = entry['price'];
+          if (size != null && size.isNotEmpty) {
+            packPricing.add(PackPrice(
+              size: size,
+              price: priceVal is num ? priceVal.toDouble() : sellingBase,
+            ));
+          }
+        }
+      }
+    }
+    if (packPricing.isEmpty) {
+      // Legacy string array (or empty) — derive the ladder from the base.
+      final labels = rawPacks?.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+      if (labels != null && labels.isNotEmpty) {
+        for (final size in labels) {
+          final mult = PackPrice.multipliers[size] ?? 1.0;
+          packPricing.add(PackPrice(size: size, price: (sellingBase * mult).roundToDouble()));
+        }
+      } else {
+        packPricing.addAll(PackPrice.defaultsFor(sellingBase));
+      }
+    }
+    final packSizes = packPricing.map((p) => p.size).toList();
 
     final availability = switch (row['stock_status'] as String?) {
       'out_of_stock' => ProductAvailability.outOfStock,
@@ -74,9 +109,8 @@ class SupabaseProductRepository implements ProductRepository {
       currency: row['currency'] as String? ?? 'SAR',
       imageUrl: row['image_url'] as String? ?? '',
       galleryImages: gallery,
-      packSizes: (packSizes == null || packSizes.isEmpty)
-          ? const ['100g', '250g', '500g', '1kg']
-          : packSizes,
+      packSizes: packSizes.isEmpty ? const ['100g', '250g', '500g', '1kg'] : packSizes,
+      packPricing: packPricing,
       rating: (row['rating'] as num?)?.toDouble() ?? 4.5,
       reviewCount: (row['review_count'] as num?)?.toInt() ?? 0,
       availability: availability,

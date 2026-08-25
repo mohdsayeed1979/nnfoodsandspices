@@ -31,17 +31,20 @@ void main() {
 
     tearDown(() => container.dispose());
 
+    // These aggregation tests use the 100g pack (the base price, multiplier
+    // 1.0) so line totals equal price*qty and stay decoupled from the pack
+    // multipliers — per-size pricing has its own test below.
     test('subtotal sums line totals across items', () async {
       container = buildContainer([
         CartItem(product: _product('a', 100), quantity: 2, packSize: '100g'),
-        CartItem(product: _product('b', 50), quantity: 3, packSize: '250g'),
+        CartItem(product: _product('b', 50), quantity: 3, packSize: '100g'),
       ]);
       await container.read(cartItemsProvider.future);
       expect(container.read(cartSubtotalProvider), 350); // 100*2 + 50*3
     });
 
     test('shipping is free at or above the free-shipping threshold', () async {
-      container = buildContainer([CartItem(product: _product('a', 1000), quantity: 1, packSize: '1kg')]);
+      container = buildContainer([CartItem(product: _product('a', 1000), quantity: 1, packSize: '100g')]);
       await container.read(cartItemsProvider.future);
       expect(container.read(cartShippingProvider), 0);
     });
@@ -61,7 +64,7 @@ void main() {
     });
 
     test('coupon discount applies once minimum subtotal is met', () async {
-      container = buildContainer([CartItem(product: _product('a', 600), quantity: 1, packSize: '1kg')]);
+      container = buildContainer([CartItem(product: _product('a', 600), quantity: 1, packSize: '100g')]);
       await container.read(cartItemsProvider.future);
       container.read(appliedCouponProvider.notifier).state = availableCoupons.firstWhere((c) => c.code == 'SPICE20');
       expect(container.read(cartDiscountProvider), 120); // 20% of 600

@@ -14,5 +14,8 @@ abstract class CartItem with _$CartItem {
 
   const CartItem._();
 
-  double get lineTotal => product.price * quantity;
+  /// Unit price for this line's selected pack size (not the base price).
+  double get unitPrice => product.priceForSize(packSize);
+
+  double get lineTotal => unitPrice * quantity;
 }

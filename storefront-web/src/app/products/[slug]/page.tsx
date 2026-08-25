@@ -4,9 +4,10 @@ import { notFound } from 'next/navigation';
 import { getProductBySlug, getRelatedProducts } from '@/lib/catalog';
 import { ProductImage } from '@/components/ProductImage';
 import { ProductCard } from '@/components/ProductCard';
-import { discountPercent, formatPrice, hasDiscount, sellingPrice } from '@/lib/format';
+import { PackSizeSelector } from '@/components/PackSizeSelector';
+import { formatPrice, hasDiscount, sellingPrice } from '@/lib/format';
 import { STOCK_LABELS } from '@/lib/types';
-import { SITE, siteUrl, whatsappLink } from '@/lib/constants';
+import { SITE, siteUrl } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,8 +39,9 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
   if (!product) notFound();
 
   const related = await getRelatedProducts(product.category?.slug, product.slug, 4);
-  const discount = hasDiscount(product);
   const gallery = [product.image_url, ...product.additional_images].filter(Boolean);
+  const baseSelling = sellingPrice(product);
+  const baseCompareAt = hasDiscount(product) ? product.price : null;
 
   const specs: [string, string][] = [
     ['SKU', product.sku ?? '—'],
@@ -98,24 +100,16 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
           </div>
           <h1 className="mt-3 font-display text-3xl font-bold text-gray-900">{product.name}</h1>
 
-          <div className="mt-4 flex items-baseline gap-3">
-            <span className="text-3xl font-extrabold text-brand-greenDark">
-              {formatPrice(sellingPrice(product), product.currency)}
-            </span>
-            {discount && (
-              <>
-                <span className="text-lg text-gray-400 line-through">
-                  {formatPrice(product.price, product.currency)}
-                </span>
-                <span className="chip bg-brand-orange/10 text-brand-orange">
-                  {discountPercent(product)}% OFF
-                </span>
-              </>
-            )}
-          </div>
+          <PackSizeSelector
+            productName={product.name}
+            packs={product.pack_prices}
+            currency={product.currency}
+            basePrice={baseSelling}
+            baseCompareAt={baseCompareAt}
+          />
 
           <span
-            className={`mt-2 text-sm font-semibold ${product.stock_status === 'in_stock' ? 'text-brand-green' : 'text-gray-500'}`}
+            className={`mt-4 block text-sm font-semibold ${product.stock_status === 'in_stock' ? 'text-brand-green' : 'text-gray-500'}`}
           >
             {STOCK_LABELS[product.stock_status]}
           </span>
@@ -124,17 +118,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
             <p className="mt-4 text-sm text-gray-600">{product.short_description}</p>
           )}
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a
-              href={whatsappLink(
-                `Hi NN Foods & Spices, I'd like to order: ${product.name} (${formatPrice(sellingPrice(product), product.currency)}).`,
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-whatsapp"
-            >
-              Order on WhatsApp
-            </a>
+          <div className="mt-6">
             <Link href="/contact" className="btn-outline">Contact Us</Link>
           </div>
 

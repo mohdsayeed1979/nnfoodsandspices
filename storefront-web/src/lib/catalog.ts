@@ -1,9 +1,12 @@
 import { getSupabase } from './supabase';
+import { packPricesFrom } from './format';
 import type { Category, Product, SortKey } from './types';
 
 const PRODUCT_SELECT = '*, category:categories(slug, name)';
 
 function mapProduct(row: Record<string, any>): Product {
+  const price = Number(row.price ?? 0);
+  const salePrice = row.sale_price == null ? null : Number(row.sale_price);
   return {
     id: row.id,
     slug: row.slug,
@@ -11,11 +14,12 @@ function mapProduct(row: Record<string, any>): Product {
     description: row.description ?? '',
     short_description: row.short_description ?? '',
     sku: row.sku ?? null,
-    price: Number(row.price ?? 0),
-    sale_price: row.sale_price == null ? null : Number(row.sale_price),
+    price,
+    sale_price: salePrice,
     currency: row.currency ?? 'INR',
     image_url: row.image_url ?? '',
     additional_images: Array.isArray(row.additional_images) ? row.additional_images : [],
+    pack_prices: packPricesFrom(row.pack_sizes, salePrice ?? price),
     is_featured: !!row.is_featured,
     is_veg: !!row.is_veg,
     stock_status: row.stock_status ?? 'in_stock',

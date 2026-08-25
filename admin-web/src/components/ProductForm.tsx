@@ -5,7 +5,37 @@ import { createClient } from '@/lib/supabase/client';
 import { useToast } from './Toast';
 import { ImageUploader } from './ImageUploader';
 import { slugify } from '@/lib/format';
-import { CURRENCIES, STOCK_LABELS, type Category, type Product, type StockStatus } from '@/lib/types';
+import {
+  CURRENCIES,
+  PACK_MULTIPLIERS,
+  STOCK_LABELS,
+  type Category,
+  type PackPrice,
+  type Product,
+  type StockStatus,
+} from '@/lib/types';
+
+/** Normalizes a product's raw pack_sizes (new {size,price} objects OR legacy
+ * plain strings) into an editable price ladder, filling missing prices from
+ * the base selling price via the standard multipliers. */
+function normalizePacks(raw: Product['pack_sizes'] | undefined, base: number): PackPrice[] {
+  const out: PackPrice[] = [];
+  if (Array.isArray(raw)) {
+    for (const e of raw) {
+      if (typeof e === 'string') {
+        if (e) out.push({ size: e, price: Math.round(base * (PACK_MULTIPLIERS[e] ?? 1)) });
+      } else if (e && typeof e === 'object' && e.size) {
+        out.push({ size: e.size, price: Number.isFinite(e.price) ? e.price : Math.round(base * (PACK_MULTIPLIERS[e.size] ?? 1)) });
+      }
+    }
+  }
+  if (out.length === 0) {
+    for (const [size, mult] of Object.entries(PACK_MULTIPLIERS)) {
+      out.push({ size, price: Math.round(base * mult) });
+    }
+  }
+  return out;
+}
 
 interface Props {
   product: Product | null;
@@ -28,6 +58,9 @@ export function ProductForm({ product, categories, onClose, onSaved }: Props) {
   const [currency, setCurrency] = useState(product?.currency ?? 'SAR');
   const [imageUrl, setImageUrl] = useState(product?.image_url ?? '');
   const [additional, setAdditional] = useState<string[]>(product?.additional_images ?? []);
+  const [packs, setPacks] = useState<PackPrice[]>(() =>
+    normalizePacks(product?.pack_sizes, product ? (product.sale_price ?? product.price) : 0),
+  );
   const [stockStatus, setStockStatus] = useState<StockStatus>(product?.stock_status ?? 'in_stock');
   const [isFeatured, setIsFeatured] = useState(product?.is_featured ?? false);
   const [isActive, setIsActive] = useState(product?.is_active ?? true);
@@ -70,6 +103,9 @@ export function ProductForm({ product, categories, onClose, onSaved }: Props) {
       currency,
       image_url: imageUrl,
       additional_images: additional,
+      // Persist per-size prices as [{size, price}] — the single source of
+      // truth read by the storefront and the Flutter app.
+      pack_sizes: packs.map((p) => ({ size: p.size, price: Number(p.price) || 0 })),
       stock_status: stockStatus,
       is_featured: isFeatured,
       is_active: isActive,
@@ -218,6 +254,51 @@ export function ProductForm({ product, categories, onClose, onSaved }: Props) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
+          </div>
+
+          <div className="md:col-span-2">
+            <div className="mb-1 flex items-center justify-between">
+              <span className="label">Pack sizes &amp; prices ({currency})</span>
+              <button
+                type="button"
+                className="text-xs font-semibold text-brand-green hover:underline"
+                onClick={() => {
+                  const base = Number(salePrice) || Number(price) || 0;
+                  setPacks((prev) =>
+                    prev.map((p) => ({
+                      ...p,
+                      price: Math.round(base * (PACK_MULTIPLIERS[p.size] ?? 1)),
+                    })),
+                  );
+                }}
+                title="Recalculate every size from the current price using the standard multipliers"
+              >
+                Auto-fill from base price
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {packs.map((p, i) => (
+                <label key={p.size} className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold text-gray-600">{p.size}</span>
+                  <input
+                    className="input"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={p.price}
+                    onChange={(e) =>
+                      setPacks((prev) =>
+                        prev.map((x, j) => (j === i ? { ...x, price: Number(e.target.value) } : x)),
+                      )
+                    }
+                  />
+                </label>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-gray-400">
+              The 100g price should match the product price above. These per-size prices are what
+              customers see on the website and mobile app.
+            </p>
           </div>
 
           <div className="md:col-span-2">

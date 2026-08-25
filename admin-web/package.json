@@ -10,7 +10,8 @@
     "lint": "next lint",
     "bootstrap-admin": "node scripts/bootstrap-admin.mjs",
     "verify-live": "node scripts/verify-live.mjs",
-    "import-images": "node scripts/bulk-import-images.mjs"
+    "import-images": "node scripts/bulk-import-images.mjs",
+    "seed-pack-prices": "node scripts/seed-pack-prices.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

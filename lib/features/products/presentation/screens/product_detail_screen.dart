@@ -110,24 +110,28 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '${AppConstants.currencySymbol}${product.price.toStringAsFixed(0)}',
-                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.primaryGreen),
-                    ),
-                    if (product.hasDiscount) ...[
-                      const SizedBox(width: 10),
+                Builder(builder: (context) {
+                  final selectedPrice = product.priceForSize(_selectedPackSize);
+                  final selectedCompareAt = product.compareAtForSize(_selectedPackSize);
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
                       Text(
-                        '${AppConstants.currencySymbol}${product.compareAtPrice!.toStringAsFixed(0)}',
-                        style: TextStyle(fontSize: 16, decoration: TextDecoration.lineThrough, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                        '${AppConstants.currencySymbol}${selectedPrice.toStringAsFixed(0)}',
+                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.primaryGreen),
                       ),
-                      const SizedBox(width: 8),
-                      Text('${product.discountPercent}% OFF', style: const TextStyle(color: AppColors.primaryOrange, fontWeight: FontWeight.w700)),
+                      if (selectedCompareAt != null) ...[
+                        const SizedBox(width: 10),
+                        Text(
+                          '${AppConstants.currencySymbol}${selectedCompareAt.toStringAsFixed(0)}',
+                          style: TextStyle(fontSize: 16, decoration: TextDecoration.lineThrough, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('${product.discountPercent}% OFF', style: const TextStyle(color: AppColors.primaryOrange, fontWeight: FontWeight.w700)),
+                      ],
                     ],
-                  ],
-                ),
+                  );
+                }),
                 const SizedBox(height: 20),
                 const Text('Pack Size', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
                 const SizedBox(height: 8),

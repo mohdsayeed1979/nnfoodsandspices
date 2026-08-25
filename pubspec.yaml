@@ -2,7 +2,7 @@ name: nn_food_spices
 description: "NN Food & Spices - Premium 100% Naturally Pure Spices"
 publish_to: 'none'
 
-version: 1.0.6+7
+version: 1.0.7+8
 
 environment:
   sdk: ^3.9.2
@@ -89,6 +89,9 @@ dependencies:
   mobile_scanner: ^6.0.7
   speech_to_text: ^7.0.0
   in_app_review: ^2.0.10
+  # Google Play in-app updates (Android only). Used to prompt installed users
+  # when a newer version is on the Play Store — see core/updates.
+  in_app_update: ^4.2.3
   flutter_slidable: ^3.1.2
   pull_to_refresh_flutter3: ^2.0.2
   visibility_detector: ^0.4.0+2
