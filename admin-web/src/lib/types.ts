@@ -3,10 +3,13 @@ export type Role = 'admin' | 'viewer';
 
 /** One pack size + its customer-facing selling price, stored in the
  * `products.pack_sizes` jsonb. Rows may still hold legacy plain strings,
- * so the raw column type is a union the admin form normalizes on load. */
+ * so the raw column type is a union the admin form normalizes on load.
+ * `active` (default true) lets an admin hide a variant without deleting it;
+ * the storefront and the app only show active variants. */
 export interface PackPrice {
   size: string;
   price: number;
+  active?: boolean;
 }
 export type PackSizeEntry = string | PackPrice;
 

@@ -50,7 +50,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
-          expandedHeight: 340,
+          // Constrained, aspect-ratio-preserving hero: tall enough to show the
+          // full packaging without dominating the screen or pushing the title,
+          // price and pack-size controls below the fold.
+          expandedHeight: 300,
           pinned: true,
           actions: [
             IconButton(
@@ -65,11 +68,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           flexibleSpace: FlexibleSpaceBar(
             background: GestureDetector(
               onTap: () => _openImageZoom(context, product),
+              // contain (not cover) so the whole product box is visible and
+              // never cropped, matching the website's presentation.
               child: ProductImage(
                 imageUrl: product.imageUrl,
                 name: product.name,
                 categoryName: product.categoryId,
                 heroTag: 'product-image-${product.id}',
+                fit: BoxFit.contain,
+                background: Theme.of(context).cardColor,
               ),
             ),
           ),
@@ -135,14 +142,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 const SizedBox(height: 20),
                 const Text('Pack Size', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
                 const SizedBox(height: 8),
+                // Only the variants enabled for THIS product, each with its own
+                // price. Selecting one updates the price display above and the
+                // pack size carried into the cart / order.
                 Wrap(
                   spacing: 8,
-                  children: product.packSizes.map((size) {
-                    final selected = size == _selectedPackSize;
+                  runSpacing: 8,
+                  children: product.effectivePackPricing.map((pack) {
+                    final selected = pack.size == _selectedPackSize;
                     return ChoiceChip(
-                      label: Text(size),
+                      label: Text('${pack.size}  ·  ${AppConstants.currencySymbol}${pack.price.toStringAsFixed(0)}'),
                       selected: selected,
-                      onSelected: (_) => setState(() => _selectedPackSize = size),
+                      onSelected: (_) => setState(() => _selectedPackSize = pack.size),
                     );
                   }).toList(),
                 ),

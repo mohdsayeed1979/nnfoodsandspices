@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../cart/domain/cart_item.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
 import '../../domain/payment_method.dart';
 import '../../data/payment_service.dart';
+import '../../data/whatsapp_order_service.dart';
 import '../providers/address_provider.dart';
 import '../providers/order_provider.dart';
 import '../widgets/add_address_sheet.dart';
@@ -86,21 +88,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: 16),
           _SectionCard(
             title: 'Payment Method',
-            child: RadioGroup<PaymentMethodType>(
-              groupValue: selectedPayment,
-              onChanged: (v) => ref.read(_selectedPaymentMethodProvider.notifier).state = v!,
-              child: Column(
-                children: PaymentMethodType.values.map((type) {
-                  final service = paymentServiceFor(type);
-                  return RadioListTile<PaymentMethodType>(
-                    value: type,
-                    contentPadding: EdgeInsets.zero,
-                    activeColor: AppColors.primaryGreen,
-                    title: Text(type.label, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
-                    subtitle: service.isConfigured ? null : const Text('Requires setup — coming soon', style: TextStyle(fontSize: 11, color: AppColors.warning)),
-                  );
-                }).toList(),
-              ),
+            child: Column(
+              children: PaymentMethodType.values.map((type) {
+                final service = paymentServiceFor(type);
+                final available = service.isConfigured; // only COD today
+                return _PaymentOption(
+                  type: type,
+                  available: available,
+                  selected: selectedPayment == type,
+                  onTap: available
+                      ? () => ref.read(_selectedPaymentMethodProvider.notifier).state = type
+                      : null,
+                );
+              }).toList(),
             ),
           ),
           const SizedBox(height: 16),
@@ -109,15 +109,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             child: itemsAsync.maybeWhen(
               data: (items) => Column(
                 children: [
-                  ...items.map((i) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          children: [
-                            Expanded(child: Text('${i.product.name} x${i.quantity}', style: const TextStyle(fontSize: 12.5))),
-                            Text('${AppConstants.currencySymbol}${i.lineTotal.toStringAsFixed(0)}', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                      )),
+                  ...items.map((i) => _OrderSummaryLine(item: i)),
                   const Divider(height: 20),
                   _row('Subtotal', subtotal),
                   if (discount > 0) _row('Discount', -discount, color: AppColors.primaryGreen),
@@ -153,24 +145,47 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     double total,
     PaymentMethodType paymentMethod,
   ) async {
+    // Guard rails: non-empty cart, a chosen address, and a payment method
+    // that is actually available (online gateways are still "coming soon").
     if (items.isEmpty) return;
-    setState(() => _placing = true);
-    final address = ref.read(addressNotifierProvider).firstWhere((a) => a.id == _selectedAddressId);
-    final orderId = 'pending';
-    final paymentResult = await paymentServiceFor(paymentMethod).pay(amount: total, orderId: orderId);
-
-    if (!paymentResult.isSuccess) {
-      setState(() => _placing = false);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(paymentResult.failureMessage ?? 'Payment failed')),
-        );
-      }
+    if (_selectedAddressId == null) {
+      _snack('Please select a delivery address.');
+      return;
+    }
+    if (!paymentServiceFor(paymentMethod).isConfigured) {
+      _snack('${paymentMethod.label} is coming soon. Please choose Cash on Delivery.');
       return;
     }
 
+    setState(() => _placing = true);
+    final address = ref.read(addressNotifierProvider).firstWhere((a) => a.id == _selectedAddressId);
+    final cartItems = items.cast<CartItem>();
+
+    // Hand the order off to the business owner over WhatsApp. The order is
+    // only "placed" once the customer actually sends that message — so we do
+    // NOT clear the cart or show a confirmation unless the handoff launched.
+    const service = WhatsAppOrderService();
+    final message = service.buildMessage(
+      items: cartItems,
+      address: address,
+      paymentMethod: paymentMethod,
+      subtotal: subtotal,
+      discount: discount,
+      shipping: shipping,
+      total: total,
+    );
+    final launched = await service.sendOrder(message);
+
+    if (!launched) {
+      setState(() => _placing = false);
+      _snack('Could not open WhatsApp. Please install WhatsApp or contact us to place your order.');
+      return;
+    }
+
+    // Record the order locally for the user's order history, then clear the
+    // cart now that the details are safely in WhatsApp for the customer to send.
     final order = await ref.read(orderNotifierProvider.notifier).placeOrder(
-          items: items.cast(),
+          items: cartItems,
           address: address,
           paymentMethod: paymentMethod,
           subtotal: subtotal,
@@ -184,6 +199,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (context.mounted) context.go('/cart/checkout/success', extra: order.id);
   }
 
+  void _snack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   Widget _row(String label, double value, {bool bold = false, bool isFree = false, Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -195,6 +215,112 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             isFree ? 'FREE' : '${value < 0 ? '-' : ''}${AppConstants.currencySymbol}${value.abs().toStringAsFixed(0)}',
             style: TextStyle(fontSize: bold ? 17 : 13, fontWeight: bold ? FontWeight.w800 : FontWeight.w600, color: color ?? (bold ? AppColors.primaryGreen : null)),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One payment method row. Title + subtitle are stacked in a flexible column
+/// so long labels like "Razorpay (Cards / UPI / Netbanking)" wrap instead of
+/// overlapping the "coming soon" note. Unavailable methods are shown but not
+/// selectable.
+class _PaymentOption extends StatelessWidget {
+  const _PaymentOption({
+    required this.type,
+    required this.available,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final PaymentMethodType type;
+  final bool available;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Icon(
+                selected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+                size: 20,
+                color: !available
+                    ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)
+                    : (selected ? AppColors.primaryGreen : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    type.label,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: available ? onSurface : onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  if (!available)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 2),
+                      child: Text(
+                        'Coming soon',
+                        style: TextStyle(fontSize: 11, color: AppColors.warning, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A single order-summary line: name (wraps), the "pack × qty" and
+/// "unit × qty" breakdown, and the line total — laid out so nothing overlaps
+/// on small screens.
+class _OrderSummaryLine extends StatelessWidget {
+  const _OrderSummaryLine({required this.item});
+  final CartItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppConstants.currencySymbol;
+    final subtle = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.product.name, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 1),
+                Text(
+                  '${item.packSize} × ${item.quantity}   ·   $c${item.unitPrice.toStringAsFixed(0)} × ${item.quantity}',
+                  style: TextStyle(fontSize: 11.5, color: subtle),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text('$c${item.lineTotal.toStringAsFixed(0)}', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
         ],
       ),
     );

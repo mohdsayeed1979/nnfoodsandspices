@@ -99,6 +99,8 @@ class _CartItemTile extends ConsumerWidget {
                 imageUrl: item.product.imageUrl,
                 name: item.product.name,
                 categoryName: item.product.categoryId,
+                fit: BoxFit.contain,
+                background: Theme.of(context).cardColor,
               ),
             ),
           ),
@@ -109,14 +111,20 @@ class _CartItemTile extends ConsumerWidget {
               children: [
                 Text(item.product.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5)),
                 const SizedBox(height: 2),
-                Text('Pack: ${item.packSize}', style: TextStyle(fontSize: 11.5, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
+                Text(
+                  '${item.packSize} · ${AppConstants.currencySymbol}${item.unitPrice.toStringAsFixed(0)} each',
+                  style: TextStyle(fontSize: 11.5, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+                ),
                 const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      '${AppConstants.currencySymbol}${item.lineTotal.toStringAsFixed(0)}',
-                      style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primaryGreen),
+                    Flexible(
+                      child: Text(
+                        '${AppConstants.currencySymbol}${item.lineTotal.toStringAsFixed(0)}',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primaryGreen),
+                      ),
                     ),
                     Row(
                       children: [

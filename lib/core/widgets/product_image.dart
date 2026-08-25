@@ -16,6 +16,8 @@ class ProductImage extends StatelessWidget {
     required this.categoryName,
     this.borderRadius,
     this.heroTag,
+    this.fit = BoxFit.cover,
+    this.background,
   });
 
   final String imageUrl;
@@ -23,6 +25,15 @@ class ProductImage extends StatelessWidget {
   final String categoryName;
   final BorderRadius? borderRadius;
   final Object? heroTag;
+
+  /// How the real photo is fitted. Product packaging is portrait, so callers
+  /// that must show the whole pack (cards, detail hero, cart thumbnail) pass
+  /// [BoxFit.contain] to avoid cropping; the default stays [BoxFit.cover].
+  final BoxFit fit;
+
+  /// Backdrop shown behind a `contain`-fitted photo so the letterboxed edges
+  /// read as intentional padding rather than a transparent gap.
+  final Color? background;
 
   static const _palette = <String, List<Color>>{
     'veg-spices': [Color(0xFF7CB342), Color(0xFF4A7D22)],
@@ -49,17 +60,28 @@ class ProductImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final networkImage = CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: fit,
+      placeholder: (context, url) => Shimmer.fromColors(
+        baseColor: AppColors.lightGrey,
+        highlightColor: Colors.white,
+        child: Container(color: Colors.white),
+      ),
+      errorWidget: (context, url, error) => _placeholder(context),
+    );
+
     final content = imageUrl.startsWith('http')
-        ? CachedNetworkImage(
-            imageUrl: imageUrl,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => Shimmer.fromColors(
-              baseColor: AppColors.lightGrey,
-              highlightColor: Colors.white,
-              child: Container(color: Colors.white),
-            ),
-            errorWidget: (context, url, error) => _placeholder(context),
-          )
+        ? (fit == BoxFit.contain
+            // Fill the slot with a neutral backdrop, then contain the photo
+            // inside it so nothing is cropped and the edges look deliberate.
+            ? Container(
+                color: background ?? AppColors.lightGrey.withValues(alpha: 0.35),
+                width: double.infinity,
+                height: double.infinity,
+                child: networkImage,
+              )
+            : networkImage)
         : _placeholder(context);
 
     final child = ClipRRect(

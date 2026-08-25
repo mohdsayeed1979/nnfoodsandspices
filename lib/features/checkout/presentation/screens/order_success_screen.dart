@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_routes.dart';
-import '../../../../core/theme/app_colors.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
   const OrderSuccessScreen({super.key, required this.orderId});
@@ -20,18 +19,18 @@ class OrderSuccessScreen extends StatelessWidget {
               Container(
                 width: 96,
                 height: 96,
-                decoration: BoxDecoration(color: AppColors.primaryGreen.withValues(alpha: 0.12), shape: BoxShape.circle),
-                child: const Icon(Icons.check_circle_rounded, color: AppColors.primaryGreen, size: 64),
+                decoration: const BoxDecoration(color: Color(0x1A25D366), shape: BoxShape.circle),
+                child: const Icon(Icons.chat_rounded, color: Color(0xFF25D366), size: 60),
               ),
               const SizedBox(height: 24),
-              const Text('Order Placed Successfully!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+              const Text('Order Ready', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
               const SizedBox(height: 8),
-              Text('Order ID: $orderId', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
-              const SizedBox(height: 4),
+              Text('Reference: $orderId', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
+              const SizedBox(height: 10),
               const Text(
-                'Thank you for shopping with NN Food & Spices. We will notify you as your order is prepared and shipped.',
+                'Your order details are ready in WhatsApp. Please send the message to complete your order — we will confirm it there.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13),
+                style: TextStyle(fontSize: 13, height: 1.5),
               ),
               const SizedBox(height: 32),
               SizedBox(

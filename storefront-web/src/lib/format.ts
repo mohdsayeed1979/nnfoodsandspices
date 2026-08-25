@@ -23,6 +23,9 @@ export function packPricesFrom(raw: unknown, base: number): PackPrice[] {
   if (Array.isArray(raw)) {
     for (const entry of raw) {
       if (entry && typeof entry === 'object' && 'size' in entry) {
+        // Skip variants an admin has disabled (active === false); a missing
+        // key means enabled, keeping backward compatibility.
+        if ((entry as any).active === false) continue;
         const size = String((entry as any).size ?? '');
         const price = Number((entry as any).price);
         if (size) out.push({ size, price: Number.isFinite(price) ? price : base });

@@ -23,15 +23,21 @@ function normalizePacks(raw: Product['pack_sizes'] | undefined, base: number): P
   if (Array.isArray(raw)) {
     for (const e of raw) {
       if (typeof e === 'string') {
-        if (e) out.push({ size: e, price: Math.round(base * (PACK_MULTIPLIERS[e] ?? 1)) });
+        if (e) out.push({ size: e, price: Math.round(base * (PACK_MULTIPLIERS[e] ?? 1)), active: true });
       } else if (e && typeof e === 'object' && e.size) {
-        out.push({ size: e.size, price: Number.isFinite(e.price) ? e.price : Math.round(base * (PACK_MULTIPLIERS[e.size] ?? 1)) });
+        out.push({
+          size: e.size,
+          price: Number.isFinite(e.price) ? e.price : Math.round(base * (PACK_MULTIPLIERS[e.size] ?? 1)),
+          active: e.active !== false,
+        });
       }
     }
   }
   if (out.length === 0) {
+    // A brand-new product starts with the common four; the admin can add,
+    // remove or rename any of them (e.g. 2kg, 5kg) before saving.
     for (const [size, mult] of Object.entries(PACK_MULTIPLIERS)) {
-      out.push({ size, price: Math.round(base * mult) });
+      out.push({ size, price: Math.round(base * mult), active: true });
     }
   }
   return out;
@@ -103,9 +109,11 @@ export function ProductForm({ product, categories, onClose, onSaved }: Props) {
       currency,
       image_url: imageUrl,
       additional_images: additional,
-      // Persist per-size prices as [{size, price}] — the single source of
-      // truth read by the storefront and the Flutter app.
-      pack_sizes: packs.map((p) => ({ size: p.size, price: Number(p.price) || 0 })),
+      // Persist variants as [{size, price, active}] — the single source of
+      // truth read by the storefront and the Flutter app. Blank rows dropped.
+      pack_sizes: packs
+        .filter((p) => p.size.trim() !== '')
+        .map((p) => ({ size: p.size.trim(), price: Number(p.price) || 0, active: p.active !== false })),
       stock_status: stockStatus,
       is_featured: isFeatured,
       is_active: isActive,
@@ -257,7 +265,7 @@ export function ProductForm({ product, categories, onClose, onSaved }: Props) {
           </div>
 
           <div className="md:col-span-2">
-            <div className="mb-1 flex items-center justify-between">
+            <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
               <span className="label">Pack sizes &amp; prices ({currency})</span>
               <button
                 type="button"
@@ -265,21 +273,36 @@ export function ProductForm({ product, categories, onClose, onSaved }: Props) {
                 onClick={() => {
                   const base = Number(salePrice) || Number(price) || 0;
                   setPacks((prev) =>
-                    prev.map((p) => ({
-                      ...p,
-                      price: Math.round(base * (PACK_MULTIPLIERS[p.size] ?? 1)),
-                    })),
+                    prev.map((p) =>
+                      PACK_MULTIPLIERS[p.size]
+                        ? { ...p, price: Math.round(base * PACK_MULTIPLIERS[p.size]) }
+                        : p,
+                    ),
                   );
                 }}
-                title="Recalculate every size from the current price using the standard multipliers"
+                title="Recalculate the standard sizes (100g/250g/500g/1kg) from the current price"
               >
-                Auto-fill from base price
+                Auto-fill standard sizes from base price
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+
+            <div className="space-y-2">
+              <div className="hidden grid-cols-[1fr_1fr_auto_auto] gap-2 px-1 text-xs font-semibold text-gray-500 sm:grid">
+                <span>Pack size</span>
+                <span>Price</span>
+                <span className="text-center">Active</span>
+                <span></span>
+              </div>
               {packs.map((p, i) => (
-                <label key={p.size} className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-gray-600">{p.size}</span>
+                <div key={i} className="grid grid-cols-[1fr_1fr_auto_auto] items-center gap-2">
+                  <input
+                    className="input"
+                    placeholder="e.g. 250g / 2kg"
+                    value={p.size}
+                    onChange={(e) =>
+                      setPacks((prev) => prev.map((x, j) => (j === i ? { ...x, size: e.target.value } : x)))
+                    }
+                  />
                   <input
                     className="input"
                     type="number"
@@ -287,17 +310,41 @@ export function ProductForm({ product, categories, onClose, onSaved }: Props) {
                     min="0"
                     value={p.price}
                     onChange={(e) =>
-                      setPacks((prev) =>
-                        prev.map((x, j) => (j === i ? { ...x, price: Number(e.target.value) } : x)),
-                      )
+                      setPacks((prev) => prev.map((x, j) => (j === i ? { ...x, price: Number(e.target.value) } : x)))
                     }
                   />
-                </label>
+                  <input
+                    type="checkbox"
+                    className="mx-auto h-5 w-5"
+                    checked={p.active !== false}
+                    title="Active — shown to customers"
+                    onChange={(e) =>
+                      setPacks((prev) => prev.map((x, j) => (j === i ? { ...x, active: e.target.checked } : x)))
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="px-2 text-lg text-red-500 hover:text-red-700"
+                    title="Remove this variant"
+                    onClick={() => setPacks((prev) => prev.filter((_, j) => j !== i))}
+                  >
+                    ✕
+                  </button>
+                </div>
               ))}
             </div>
+
+            <button
+              type="button"
+              className="btn-secondary mt-2 text-sm"
+              onClick={() => setPacks((prev) => [...prev, { size: '', price: 0, active: true }])}
+            >
+              + Add variant
+            </button>
             <p className="mt-1 text-xs text-gray-400">
-              The 100g price should match the product price above. These per-size prices are what
-              customers see on the website and mobile app.
+              Each product can have its own sizes — add only the packs this product is sold in (e.g. just
+              100g &amp; 250g, or 1kg / 2kg / 5kg). The 100g price should match the product price above.
+              These per-size prices are what customers see on the website and mobile app.
             </p>
           </div>
 

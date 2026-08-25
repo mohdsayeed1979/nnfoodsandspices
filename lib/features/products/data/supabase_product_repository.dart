@@ -67,7 +67,10 @@ class SupabaseProductRepository implements ProductRepository {
         if (entry is Map) {
           final size = entry['size']?.toString();
           final priceVal = entry['price'];
-          if (size != null && size.isNotEmpty) {
+          // A variant is shown unless the admin explicitly disabled it
+          // (active == false). Missing key => enabled (back-compat).
+          final active = entry['active'] != false;
+          if (active && size != null && size.isNotEmpty) {
             packPricing.add(PackPrice(
               size: size,
               price: priceVal is num ? priceVal.toDouble() : sellingBase,
